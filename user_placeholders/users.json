@@ -1,0 +1,26 @@
+[
+	{
+		"username": "user1",
+		"password": "pass123",
+		"role": "ROLE_USER",
+		"enabled": true
+	},
+	{
+		"username": "user2",
+		"password": "pass123",
+		"role": "ROLE_USER",
+		"enabled": true
+	},
+	{
+		"username": "user3",
+		"password": "pass123",
+		"role": "ROLE_USER",
+		"enabled": true
+	},
+	{
+		"username": "user4",
+		"password": "pass123",
+		"role": "ROLE_USER",
+		"enabled": true
+	}
+]
