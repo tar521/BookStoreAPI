@@ -28,6 +28,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure( AuthenticationManagerBuilder auth ) throws Exception {
 		
+		auth.inMemoryAuthentication()
+			.withUser("admin")
+			.password(passwordEncoder().encode("password123"))
+			.authorities("ADMIN");
 		// security will only find the one built-in user within the service
 		auth.userDetailsService( userDetailsService );
 	}
@@ -37,14 +41,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		
 		// http://localhost:8080/authenticate --> sent user credentials to create JWT
 		
-//		http.csrf().disable()
-//			.authorizeRequests()
-//			.antMatchers("/authenticate").permitAll() // allow anyone to create a JWT as long as they have a username + password
-//			.anyRequest().authenticated(); // any other API in this project need to be authenticated (token or user info)
+
 		
 		
 		http.csrf().disable()
 			.authorizeRequests()
+			.antMatchers("/v3/api-docs/**").permitAll()
+			.antMatchers("/swagger-ui*/**").permitAll()
 			.antMatchers("/api/register").permitAll()
 			.antMatchers("/api/authenticate").permitAll() // anyone can create token if they're a user
 			.antMatchers("/api/change/password").permitAll()

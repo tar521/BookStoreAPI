@@ -23,6 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cognixia.jump.model.Book;
 import com.cognixia.jump.repository.BookRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -33,11 +38,27 @@ public class BookController {
 	@Autowired
 	BookRepository repo;
 	
+	@Operation(summary = "Get all the books in the book table.", 
+			   description = "Gets all the books from the book table in the database. Each book grabbed has an id, title, author, isbn, price, and quantity."
+			)
 	@GetMapping("/books")
 	public List<Book> getBooks() {
 		return repo.findAll();
 	}
 	
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Book has been found", 
+						 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Book.class) ) ),
+			@ApiResponse(responseCode = "201", description = "Book has been created",
+						 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Book.class))),
+			@ApiResponse(responseCode = "404", description = "Book was not found", 
+			 			 content = @Content)
+		}
+	)
+	
+	@Operation(summary = "Get a single book from the book table.", 
+	   description = "Gets a book specified by its ID from the book table in the database. The book grabbed has an id, title, author, isbn, price, and quantity."
+	)
 	@GetMapping("/books/{id}")
 	public ResponseEntity<?> getBookById(@PathVariable int id) {
 		Optional<Book> found = repo.findById(id);
@@ -50,6 +71,9 @@ public class BookController {
 		}
 	}
 	
+	@Operation(summary = "ADMIN ONLY - Add a book to the database.", 
+			   description = "Insert a book into the table with all required fields. Each book inserted has an id, title, author, isbn, price, and quantity."
+			)
 	// ADMIN ONLY
 	@PostMapping("/books/add")
 	public ResponseEntity<?> createBook(@Valid @RequestBody Book book) {
@@ -61,6 +85,9 @@ public class BookController {
 		return ResponseEntity.status(201).body(created);
 	}
 	
+	@Operation(summary = "ADMIN ONLY - Update quantity of a book.", 
+			   description = "Updates the quantity of a book specified by its ID and desired amount."
+			)
 	// ADMIN ONLY
 	@PatchMapping("/book/inventory")
 	public ResponseEntity<?> updateInventory(@PathParam(value = "id") int id, @PathParam(value = "quantity") int quantity) {
@@ -75,6 +102,9 @@ public class BookController {
 		}
 	}
 	
+	@Operation(summary = "ADMIN ONLY - Removes book from database.", 
+			   description = "Removes a book specified by its ID."
+			)
 	// ADMIN ONLY
 	@DeleteMapping("/book/{id}")
 	public ResponseEntity<?> removeBook(@PathVariable int id) {

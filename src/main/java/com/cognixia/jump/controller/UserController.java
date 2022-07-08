@@ -37,6 +37,11 @@ import com.cognixia.jump.repository.UserRepository;
 import com.cognixia.jump.service.UserService;
 import com.cognixia.jump.util.JwtUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -62,12 +67,28 @@ public class UserController {
 	@Autowired
 	PasswordEncoder encoder;
 
+	@Operation(summary = "ADMIN ONLY - Get all the users from the user table.", 
+			   description = "Gets all the users from the user table in the database. Each user grabbed has an id, username, password, role, and enabled status."
+			)
 	// ADMIN ONLY
 	@GetMapping("/user")
 	public List<User> getUsers() {
 		return repo.findAll();
 	}
+	
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Book has been found", 
+						 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Book.class) ) ),
+			@ApiResponse(responseCode = "201", description = "Book has been created",
+						 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Book.class))),
+			@ApiResponse(responseCode = "404", description = "Book was not found", 
+			 			 content = @Content)
+		}
+	)
 
+	@Operation(summary = "Get a JWT Token for an inputed user.", 
+	   description = "Gets a JWT Token for an inputed user to use the allowed api methods."
+	)
 	@PostMapping("/authenticate")
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest request) throws Exception {
 
@@ -95,6 +116,9 @@ public class UserController {
 		return ResponseEntity.status(201).body(new AuthenticationResponse(jwt));
 	}
 
+	@Operation(summary = "Create a user.", 
+			   description = "Creates a user in the database. Their password is encrypted before it is saved. Only users can be created this way."
+			)
 	// ONLY ABLE TO MAKE USERS - NO ADMINS
 	@PostMapping("/register")
 	public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
@@ -115,6 +139,9 @@ public class UserController {
 
 	}
 	
+	@Operation(summary = "Updates a user's password", 
+			   description = "The tokened user can update their password with a path parameter (to be changed for security)."
+			)
 	@PatchMapping("/change/password")
 	public ResponseEntity<?> updatePassword(@PathParam(value = "password") String password) {
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -146,6 +173,9 @@ public class UserController {
 		}
 	}
 
+	@Operation(summary = "ADMIN ONLY - Get a single user from the user table.", 
+			   description = "Retrieves a single user from the user table with specified username."
+			)
 	// ADMIN ONLY
 	@GetMapping("/user/{name}")
 	public ResponseEntity<?> getUserByUsername(@PathVariable String name) {
@@ -158,6 +188,9 @@ public class UserController {
 		}
 	}
 	
+	@Operation(summary = "ADMIN ONLY - Get a single user from the user table.", 
+			   description = "Retrieves a single user from the user table with specified ID."
+			)
 	// ADMIN ONLY
 	@GetMapping("/user/{id}")
 	public ResponseEntity<?> getUserById(@PathVariable int id) {
@@ -170,6 +203,9 @@ public class UserController {
 		}
 	}
 
+	@Operation(summary = "Get the cart specific to user.", 
+			   description = "Tokened user's cart is retieved from the database."
+			)
 	@GetMapping("/user/cart")
 	public ResponseEntity<?> getUserCart() {
 
@@ -191,6 +227,9 @@ public class UserController {
 		}
 	}
 
+	@Operation(summary = "Add a book to cart specific to user.", 
+			   description = "Tokened user can add a book to their cart with its necessary fields (id, title, author, isbn, and quantity)."
+			)
 	@PostMapping("/user/addToCart")
 	public ResponseEntity<?> addBookToCart(@Valid @RequestBody Book book) {
 
@@ -212,6 +251,9 @@ public class UserController {
 		}
 	}
 
+	@Operation(summary = "Add a book to cart specific to user.", 
+			   description = "Tokened user can add a book to their cart by book's id."
+			)
 	@PostMapping("/user/addToCart/{id}")
 	public ResponseEntity<?> addBookToCartById(@PathVariable int id) {
 
@@ -234,6 +276,9 @@ public class UserController {
 
 	}
 	
+	@Operation(summary = "Checkout user cart", 
+			   description = "Tokened user can checkout their cart. There is an exception thrown if there is not enough inventory to order a book."
+			)
 	@DeleteMapping("/user/cart/checkout")
 	public ResponseEntity<?> userCheckOut() throws ZeroQuantityException {
 		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -256,6 +301,9 @@ public class UserController {
 		}
 	}
 
+	@Operation(summary = "Remove item from user cart", 
+			   description = "Tokened user can remove an item from their cart. Book inputed with its necessary fields (id, title, author, isbn, and quantity)."
+			)
 	@DeleteMapping("/user/cart")
 	public ResponseEntity<?> deleteCartItemByBook(@RequestBody Book book) {
 
@@ -291,6 +339,9 @@ public class UserController {
 
 	}
 
+	@Operation(summary = "Remove item from user cart", 
+			   description = "Tokened user can remove an item from their cart by the cart id."
+			)
 	@DeleteMapping("/user/cart/{id}")
 	public ResponseEntity<?> deleteCartItemById(@PathVariable int id) {
 
